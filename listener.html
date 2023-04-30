@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>Listener</title>
+  </head>
+  <body>
+    <h1>Listening</h1>
+    <p id="info">Waiting for message. Sound notification inactive.</p>
+    <button id="enableSound">Enable sound notification</button>
+    <form action="clear.php" class="invisible">
+      <input type="submit" name="" id="clear" value="Clear notifications" />
+    </form>
+    <script>
+      const info = document.getElementById("info");
+      const enableSound = document.getElementById("enableSound");
+      const form = document.querySelector("form");
+
+      const eventsource = new EventSource("./notifier_sender.php");
+      let msgPlayed = false;
+      let soundOn = false;
+
+      enableSound.addEventListener("click", () => {
+        soundOn = true;
+        info.innerHTML = "Waiting for message. Sound notification active.";
+      });
+
+      eventsource.addEventListener("message", (e) => {
+        console.log(e.data);
+        if (e.data) {
+          info.innerHTML = `Received message @ ${e.data}`;
+          form.classList.remove("invisible");
+
+          if (!msgPlayed && soundOn) {
+            // Play audio
+            const note = new Audio("./notification.wav");
+            note.play();
+          }
+
+          msgPlayed = true;
+        }
+      });
+    </script>
+  </body>
+</html>
